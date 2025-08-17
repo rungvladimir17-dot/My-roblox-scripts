@@ -1,0 +1,37 @@
+local p=game.Players.LocalPlayer
+local c=p.Character or p.CharacterAdded:Wait()
+local h=c:WaitForChild("Humanoid")
+local hrp=c:WaitForChild("HumanoidRootPart")
+local fps,bad=1,true
+
+
+local g=Instance.new("ScreenGui",game.CoreGui)
+local f=Instance.new("Frame",g)
+f.Size=UDim2.new(0,180,0,200)
+f.Position=UDim2.new(0.5,-90,0.5,-100)
+f.BackgroundColor3=Color3.fromRGB(40,40,40)
+f.BorderSizePixel=2
+local layout=Instance.new("UIListLayout",f)
+layout.Padding=UDim.new(0,5)
+layout.HorizontalAlignment=Enum.HorizontalAlignment.Center
+layout.VerticalAlignment=Enum.VerticalAlignment.Center
+
+local function b(n,func)local btn=Instance.new("TextButton",f)btn.Size=UDim2.new(0,160,0,40)btn.Text=n btn.TextScaled=true btn.BackgroundColor3=Color3.fromRGB(60,60,60) btn.TextColor3=Color3.fromRGB(255,255,255) btn.MouseButton1Click:Connect(func) end
+
+b("FPS=1",function() fps=1;setfpscap(1) end)
+b("FPS=2",function() fps=2;setfpscap(2) end)
+b("FPS=30",function() fps=30;setfpscap(30) end)
+b("FPS=60",function() fps=60;setfpscap(60) end)
+b("Toggle Bad Wi-Fi",function() bad=not bad end)
+
+
+task.spawn(function()
+    while true do
+        if bad then
+            if math.random()<0.3 then h.WalkSpeed=0 task.wait(math.random(1,3)/fps) end
+            if math.random()<0.5 then hrp.CFrame=hrp.CFrame+Vector3.new(math.random(-5,5),0,math.random(-5,5)) end
+            h.WalkSpeed=math.random(2,6)
+        else h.WalkSpeed=16 end
+        task.wait(1/fps)
+    end
+end)
