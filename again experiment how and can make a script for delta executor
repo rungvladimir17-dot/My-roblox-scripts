@@ -1,0 +1,27 @@
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 200, 0, 150)
+Frame.Position = UDim2.new(0.5, -100, 0.5, -75)
+Frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+Frame.BorderSizePixel = 2
+
+local UIList = Instance.new("UIListLayout", Frame)
+UIList.Padding = UDim.new(0,5)
+UIList.FillDirection = Enum.FillDirection.Vertical
+UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIList.VerticalAlignment = Enum.VerticalAlignment.Center
+
+local function makeBtn(name, func)
+    local btn = Instance.new("TextButton", Frame)
+    btn.Size = UDim2.new(0, 160, 0, 40)
+    btn.Text = name
+    btn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.TextScaled = true
+    btn.MouseButton1Click:Connect(func)
+end
+
+makeBtn("FPS = 1", function() setfpscap(1) end)
+makeBtn("FPS = 2", function() setfpscap(2) end)
+makeBtn("FPS = 30", function() setfpscap(30) end)
+makeBtn("FPS = 60 (Normal)", function() setfpscap(60) end)
