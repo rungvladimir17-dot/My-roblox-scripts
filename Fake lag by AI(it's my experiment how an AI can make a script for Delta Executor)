@@ -1,0 +1,218 @@
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+math.randomseed(tick())
+
+local settings = {
+    bury = false,
+    glitchMove = false,
+    glitchJump = false,
+    randomAnim = false,
+    spinJump = false,
+    fps = 5
+}
+
+local allowedAnimations = {
+    Enum.HumanoidStateType.Seated,
+    Enum.HumanoidStateType.Climbing,
+    Enum.HumanoidStateType.Running,
+    Enum.HumanoidStateType.Walking,
+    Enum.HumanoidStateType.Idle
+}
+
+local function isAllowedAnim(state)
+    for _, s in ipairs(allowedAnimations) do
+        if s == state then return true end
+    end
+    return false
+end
+
+local function bury()
+    local rootPos = hrp.Position
+    hrp.CFrame = CFrame.new(rootPos.X, rootPos.Y - 3, rootPos.Z)
+    task.wait(1.5)
+    hrp.CFrame = CFrame.new(rootPos.X, rootPos.Y, rootPos.Z)
+end
+
+local function glitchMove()
+    local fast = math.random() < 0.5
+    local animate = math.random() < 0.5
+
+    humanoid.WalkSpeed = fast and 32 or 4
+    if animate then
+        humanoid:ChangeState(Enum.HumanoidStateType.Running)
+    else
+        humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+    end
+
+    if fast and math.random() < 0.5 then
+        local oldPos = hrp.CFrame
+        hrp.CFrame = hrp.CFrame * CFrame.new(-5,0,0)
+        task.wait(0.2)
+        hrp.CFrame = oldPos
+    end
+end
+
+local function glitchJump()
+    local oldPos = hrp.CFrame
+    hrp.CFrame = oldPos * CFrame.new(0,-10,0)
+    task.wait(0.3)
+    hrp.CFrame = oldPos * CFrame.new(0,10,0)
+    task.wait(0.3)
+    hrp.CFrame = oldPos
+end
+
+local function spinDuringJump()
+    local oldCFrame = hrp.CFrame
+    local spinSpeed = math.random(50, 300) -- скорость вращения
+    local duration = math.random(3,10)/10
+    local start = tick()
+    while tick() - start < duration do
+        hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(spinSpeed*task.wait()), 0)
+    end
+    hrp.CFrame = oldCFrame
+end
+
+
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(1, 0, 0, 160)
+Frame.Position = UDim2.new(0, 0, 1, -160)
+Frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Frame.BorderSizePixel = 1
+Frame.BorderColor3 = Color3.fromRGB(150,150,150)
+
+local UIList = Instance.new("UIListLayout", Frame)
+UIList.FillDirection = Enum.FillDirection.Horizontal
+UIList.Padding = UDim.new(0,5)
+
+local collapsed = false
+local collapseBtn = Instance.new("TextButton", ScreenGui)
+collapseBtn.Size = UDim2.new(0, 60, 0, 40)
+collapseBtn.Position = UDim2.new(1, -70, 1, -50)
+collapseBtn.Text = "->"
+collapseBtn.TextScaled = true
+collapseBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+collapseBtn.BorderSizePixel = 1
+collapseBtn.BorderColor3 = Color3.fromRGB(150,150,150)
+collapseBtn.TextColor3 = Color3.fromRGB(255,255,255)
+
+collapseBtn.MouseButton1Click:Connect(function()
+    collapsed = not collapsed
+    Frame.Visible = not collapsed
+    collapseBtn.Text = collapsed and "<-" or "->"
+end)
+
+local function makeToggle(name, settingKey)
+    local btn = Instance.new("TextButton", Frame)
+    btn.Size = UDim2.new(0, 120, 0, 40)
+    btn.Text = name..": OFF"
+    btn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+    btn.BorderSizePixel = 1
+    btn.BorderColor3 = Color3.fromRGB(150,150,150)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.TextScaled = true
+    btn.MouseButton1Click:Connect(function()
+        settings[settingKey] = not settings[settingKey]
+        btn.Text = name..": "..(settings[settingKey] and "ON" or "OFF")
+    end)
+end
+
+makeToggle("bury", "bury")
+makeToggle("glitchMove", "glitchMove")
+makeToggle("glitchJump", "glitchJump")
+makeToggle("randomAnim", "randomAnim")
+makeToggle("spinJump", "spinJump")
+
+local fpsLabel = Instance.new("TextLabel", Frame)
+fpsLabel.Size = UDim2.new(0, 100, 0, 40)
+fpsLabel.Text = "FPS: "..settings.fps
+fpsLabel.BackgroundColor3 = Color3.fromRGB(25,25,25)
+fpsLabel.BorderSizePixel = 1
+fpsLabel.BorderColor3 = Color3.fromRGB(150,150,150)
+fpsLabel.TextColor3 = Color3.fromRGB(255,255,255)
+fpsLabel.TextScaled = true
+
+local fpsPlus = Instance.new("TextButton", Frame)
+fpsPlus.Size = UDim2.new(0, 40, 0, 40)
+fpsPlus.Text = "+"
+fpsPlus.BackgroundColor3 = Color3.fromRGB(25,25,25)
+fpsPlus.BorderSizePixel = 1
+fpsPlus.BorderColor3 = Color3.fromRGB(150,150,150)
+fpsPlus.TextColor3 = Color3.fromRGB(255,255,255)
+fpsPlus.TextScaled = true
+fpsPlus.MouseButton1Click:Connect(function()
+    settings.fps = math.clamp(settings.fps + 1, 1, 30)
+    fpsLabel.Text = "FPS: "..settings.fps
+end)
+
+local fpsMinus = Instance.new("TextButton", Frame)
+fpsMinus.Size = UDim2.new(0, 40, 0, 40)
+fpsMinus.Text = "-"
+fpsMinus.BackgroundColor3 = Color3.fromRGB(25,25,25)
+fpsMinus.BorderSizePixel = 1
+fpsMinus.BorderColor3 = Color3.fromRGB(150,150,150)
+fpsMinus.TextColor3 = Color3.fromRGB(255,255,255)
+fpsMinus.TextScaled = true
+fpsMinus.MouseButton1Click:Connect(function()
+    settings.fps = math.clamp(settings.fps - 1, 1, 30)
+    fpsLabel.Text = "FPS: "..settings.fps
+end)
+
+local panicBtn = Instance.new("TextButton", Frame)
+panicBtn.Size = UDim2.new(0, 120, 0, 40)
+panicBtn.Text = "PANIC!"
+panicBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+panicBtn.BorderSizePixel = 1
+panicBtn.BorderColor3 = Color3.fromRGB(150,150,150)
+panicBtn.TextColor3 = Color3.fromRGB(255,255,255)
+panicBtn.TextScaled = true
+panicBtn.MouseButton1Click:Connect(function()
+    settings.bury = false
+    settings.glitchMove = false
+    settings.glitchJump = false
+    settings.randomAnim = false
+    settings.spinJump = false
+    humanoid.WalkSpeed = 16
+    fpsLabel.Text = "FPS: "..settings.fps
+end)
+
+task.spawn(function()
+    while true do
+        local interval = 1 / settings.fps
+
+        if settings.bury and humanoid.FloorMaterial ~= Enum.Material.Air and math.random(1,6) == 1 then
+            bury()
+        end
+
+        if settings.glitchMove and math.random() < 0.5 then
+            glitchMove()
+        end
+
+        if settings.glitchJump and humanoid:GetState() == Enum.HumanoidStateType.Jumping and math.random() < 0.5 then
+            glitchJump()
+        end
+
+        if settings.randomAnim and isAllowedAnim(humanoid:GetState()) and math.random() < 0.3 then
+            humanoid:ChangeState(allowedAnimations[math.random(1,#allowedAnimations)])
+        end
+
+        if settings.spinJump and humanoid:GetState() == Enum.HumanoidStateType.Jumping and math.random() < 0.2 then
+            spinDuringJump()
+        end
+
+      
+        if math.random() < 0.3 then
+            local originalSpeed = humanoid.WalkSpeed
+            local factor = math.random(50,150)/100
+            humanoid.WalkSpeed = 16 * factor
+            task.wait(0.2)
+            humanoid.WalkSpeed = originalSpeed
+        end
+
+        task.wait(interval)
+    end
+end)
