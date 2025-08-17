@@ -1,27 +1,57 @@
+
+
+local RunService = game:GetService("RunService")
+
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 200, 0, 150)
-Frame.Position = UDim2.new(0.5, -100, 0.5, -75)
-Frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
-Frame.BorderSizePixel = 2
+Frame.Size = UDim2.new(0, 200, 0, 100)
+Frame.Position = UDim2.new(0.5, -100, 0.5, -50)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BorderSizePixel = 1
+Frame.BorderColor3 = Color3.fromRGB(120, 120, 120)
 
-local UIList = Instance.new("UIListLayout", Frame)
-UIList.Padding = UDim.new(0,5)
-UIList.FillDirection = Enum.FillDirection.Vertical
-UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIList.VerticalAlignment = Enum.VerticalAlignment.Center
+local label = Instance.new("TextLabel", Frame)
+label.Size = UDim2.new(1, -10, 0, 30)
+label.Position = UDim2.new(0, 5, 0, 5)
+label.Text = "Fake FPS Mode:"
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.TextScaled = true
+label.BackgroundTransparency = 1
 
-local function makeBtn(name, func)
+local function makeBtn(text, fps)
     local btn = Instance.new("TextButton", Frame)
-    btn.Size = UDim2.new(0, 160, 0, 40)
-    btn.Text = name
-    btn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Size = UDim2.new(0, 180, 0, 25)
+    btn.Position = UDim2.new(0, 10, 0, 5 + (#Frame:GetChildren()-2)*30)
+    btn.Text = text
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextScaled = true
-    btn.MouseButton1Click:Connect(func)
+    btn.MouseButton1Click:Connect(function()
+        
+        local target = fps
+        task.spawn(function()
+            while btn:GetAttribute("enabled") do
+                local t0 = tick()
+                RunService.RenderStepped:Wait()
+                repeat until tick() - t0 >= 1 / target
+            end
+        end)
+    end)
+    btn:SetAttribute("enabled", true)
+    return btn
 end
 
-makeBtn("FPS = 1", function() setfpscap(1) end)
-makeBtn("FPS = 2", function() setfpscap(2) end)
-makeBtn("FPS = 30", function() setfpscap(30) end)
-makeBtn("FPS = 60 (Normal)", function() setfpscap(60) end)
+local btn1 = makeBtn("Simulate 1 FPS", 1)
+local btn2 = makeBtn("Simulate 2 FPS", 2)
+local btnOff = Instance.new("TextButton", Frame)
+btnOff.Size = UDim2.new(0, 180, 0, 25)
+btnOff.Position = UDim2.new(0, 10, 0, 5 + (Frame:GetChildren()-2)*30)
+btnOff.Text = "Turn OFF"
+btnOff.BackgroundColor3 = Color3.fromRGB(80, 20, 20)
+btnOff.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnOff.TextScaled = true
+btnOff.MouseButton1Click:Connect(function()
+    for _,btn in ipairs({btn1, btn2}) do
+        btn:SetAttribute("enabled", false)
+    end
+end)
