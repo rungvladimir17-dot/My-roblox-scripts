@@ -1,0 +1,41 @@
+local p=game.Players.LocalPlayer
+local c=p.Character or p.CharacterAdded:Wait()
+local h=c:WaitForChild("Humanoid")
+local r=c:WaitForChild("HumanoidRootPart")
+local fps,bad=1,true
+
+
+local g=Instance.new("ScreenGui",game.CoreGui)
+for i,v in pairs({
+  {"FPS+",function() fps=math.clamp(fps+1,1,30) end},
+  {"FPS-",function() fps=math.clamp(fps-1,1,30) end},
+  {"Toggle Bad Wi-Fi",function() bad=not bad end}
+}) do
+  local b=Instance.new("TextButton",g)
+  b.Size=UDim2.new(0,140,0,30)
+  b.Position=UDim2.new(0,10,0,10+(i-1)*35)
+  b.Text=v[1]
+  b.BackgroundColor3=Color3.fromRGB(60,60,60)
+  b.TextColor3=Color3.new(1,1,1)
+  b.TextScaled=true
+  b.MouseButton1Click:Connect(v[2])
+end
+
+
+task.spawn(function()
+  while true do
+    if bad then
+      if math.random()<.3 then
+        h.WalkSpeed=0
+        task.wait(math.random(1,2)/fps)
+      end
+      if math.random()<.5 then
+        r.CFrame=r.CFrame*CFrame.new(math.random(-3,3),0,math.random(-3,3))
+      end
+      h.WalkSpeed=math.random(2,5)
+    else
+      h.WalkSpeed=16
+    end
+    task.wait(1/fps)
+  end
+end)
