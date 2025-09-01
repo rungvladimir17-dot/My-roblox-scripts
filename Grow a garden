@@ -1,0 +1,41 @@
+
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+
+local seedName = "EggplantSeed"  -- <- меняешь на любое семя
+local seedAmount = 1
+
+
+local function scanFolder(folder, path, foundEvents)
+    for _, obj in pairs(folder:GetChildren()) do
+        local currentPath = path .. "/" .. obj.Name
+        if obj:IsA("RemoteEvent") then
+            table.insert(foundEvents, {name = obj.Name, path = currentPath, obj = obj})
+        end
+        if #obj:GetChildren() > 0 then
+            scanFolder(obj, currentPath, foundEvents)
+        end
+    end
+end
+
+local foundEvents = {}
+local servicesToCheck = {ReplicatedStorage, game:GetService("Workspace"), game:GetService("ReplicatedFirst")}
+
+for _, service in pairs(servicesToCheck) do
+    scanFolder(service, service.Name, foundEvents)
+end
+
+for _, data in pairs(foundEvents) do
+    local success, err = pcall(function()
+        data.obj:FireServer(seedName, seedAmount)
+    end)
+    if success then
+        print("Попытка через RemoteEvent: " .. data.path .. " успешна!")
+    else
+        print("Попытка через RemoteEvent: " .. data.path .. " не удалась: " .. tostring(err))
+    end
+end
+
+print("Сканирование и тест завершены. Смотри консоль для результатов.)
