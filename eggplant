@@ -1,0 +1,3 @@
+local rs = game:GetService("ReplicatedStorage")
+local e = rs:WaitForChild("GiveSeedEvent")
+e:FireServer("EggplantSeed", 1)
