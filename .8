@@ -1,0 +1,23 @@
+
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+
+
+local success, GiveSeedEvent = pcall(function()
+    return ReplicatedStorage:WaitForChild("GiveSeedEvent")
+end)
+
+if success and GiveSeedEvent and GiveSeedEvent:IsA("RemoteEvent") then
+    print("RemoteEvent found!...")
+  
+    local eggplantSuccess, eggplantErr = pcall(function()
+        GiveSeedEvent:FireServer("EggplantSeed", 1)
+    end)
+    if eggplantSuccess then
+        print("Eggplant Seed issued!")
+    else
+        warn(" Error!: "..tostring(eggplantErr))
+end
